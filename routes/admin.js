@@ -9,6 +9,9 @@ router.get("/create-post", postController.renderCreatePage);
 
 router.post("/", postController.createPost);
 
-router.get("/edit/:postId");
+router.get("/edit/:postId", postController.getEditPost);
 
+router.post("/edit-post", postController.updatePost);
 module.exports = router;
+
+router.post("/delete/:postId", postController.deletePost);
