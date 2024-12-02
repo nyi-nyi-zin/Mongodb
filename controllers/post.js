@@ -22,7 +22,6 @@ exports.renderHomePage = (req, res) => {
     .populate("userId", "username")
     .then((posts) => {
       {
-        console.log(posts);
         res.render("home", {
           title: "Home Page",
           postsArr: posts,
