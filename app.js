@@ -6,11 +6,14 @@ const app = express();
 const dotenv = require("dotenv").config();
 const session = require("express-session");
 const mongoStore = require("connect-mongodb-session")(session);
+const csrf = require("csurf");
 
 app.set("view engine", "ejs");
 app.set("views", "views");
 
 const User = require("./models/user");
+
+const { isLogin } = require("./middleware/is-login");
 
 const store = new mongoStore({
   uri: process.env.MONGODB_URL,
@@ -31,8 +34,29 @@ app.use(
     store,
   })
 );
+const csrfProtect = csrf();
+app.use(csrfProtect);
 
-app.use("/admin", adminRoutes);
+app.use((req, res, next) => {
+  if (req.session.isLogin === undefined) {
+    return next();
+  }
+  User.findById(req.session.userInfo._id)
+    .select("_id email")
+    .then((user) => {
+      req.user = user;
+      next();
+    })
+    .catch((err) => console.log(err));
+});
+
+app.use((req, res, next) => {
+  res.locals.isLogin = req.session.isLogin ? true : false;
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
+app.use("/admin", isLogin, adminRoutes);
 app.use(postRoutes);
 app.use(authRoutes);
 

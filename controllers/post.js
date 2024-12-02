@@ -1,6 +1,7 @@
 const Post = require("../models/posts");
 
 exports.createPost = (req, res) => {
+  console.log(req.user);
   const { title, description, photo } = req.body;
   Post.create({ title, description, imgUrl: photo, userId: req.user })
     .then((result) => {
@@ -19,13 +20,12 @@ exports.renderHomePage = (req, res) => {
 
   Post.find()
     .select("title")
-    .populate("userId", "username")
+    .populate("userId", "email")
     .then((posts) => {
       {
         res.render("home", {
           title: "Home Page",
           postsArr: posts,
-          isLogin: req.session.isLogin ? true : false,
         });
       }
     })

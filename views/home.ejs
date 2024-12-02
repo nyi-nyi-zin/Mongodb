@@ -8,7 +8,11 @@
 <% if(isLogin){ %>
 <a href="/admin/create-post">Add a new post</a>
 
-<form action="/logout" method="post"><button>Logout</button></form>
+<form action="/logout" method="post">
+  <input hidden value="<%= csrfToken %>" name="_csrf" />
+
+  <button>Logout</button>
+</form>
 
 <% }else{ %>
 <a href="/login">Login</a>
@@ -25,6 +29,7 @@
 <div class="post-box">
   <div>
     <p class="post-title"><%= post.title %></p>
+    <p>Post By =><%= post.userId.email %></p>
   </div>
 
   <a class="btn" href="/post/<%= post._id %>">See More...</a>
