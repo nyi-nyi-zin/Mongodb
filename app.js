@@ -7,6 +7,7 @@ const dotenv = require("dotenv").config();
 const session = require("express-session");
 const mongoStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
+const flash = require("connect-flash");
 
 app.set("view engine", "ejs");
 app.set("views", "views");
@@ -35,6 +36,7 @@ app.use(
   })
 );
 const csrfProtect = csrf();
+app.use(flash());
 app.use(csrfProtect);
 
 app.use((req, res, next) => {
