@@ -1,5 +1,15 @@
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
+const dotenv = require("dotenv").config();
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.SENDER_MAIL,
+    pass: process.env.MAIL_PASSWORD,
+  },
+});
 
 //Render Register Page
 exports.getRegisterPage = (req, res) => {
@@ -22,6 +32,12 @@ exports.registerAccount = (req, res) => {
       .then((hashedpassword) => {
         return User.create({ email, password: hashedpassword }).then((_) => {
           res.redirect("/login");
+          transporter.sendMail({
+            from: process.env.SENDER_MAIL,
+            to: email,
+            subject: "Register Successful",
+            html: "<h1>Register Account successful.</h1><p>Created Account using this email</p>",
+          });
         });
       })
       .catch((err) => console.log(err));
