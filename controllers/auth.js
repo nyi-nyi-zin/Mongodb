@@ -1,9 +1,13 @@
+//Import User Schema
 const User = require("../models/user");
+
+//Import third party packages
 const bcrypt = require("bcrypt");
 const dotenv = require("dotenv").config();
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 
+//configure third party package
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -82,14 +86,13 @@ exports.postLoginData = (req, res) => {
         .catch((err) => console.log(err));
     })
     .catch((err) => console.log(err));
-
-  // res.redirect("/");
 };
 
 //Handle Logout
 exports.logout = (req, res) => {
-  req.session.destroy();
-  res.redirect("/");
+  req.session.destroy((_) => {
+    res.redirect("/");
+  });
 };
 
 //Render reset password Page
@@ -139,6 +142,7 @@ exports.resetLinkSend = (req, res) => {
   });
 };
 
+//Render NewPassword page
 exports.getNewPasswordPage = (req, res) => {
   const { token } = req.params;
   User.findOne({ resetToken: token, tokenExpiration: { $gt: Date.now() } })
@@ -157,6 +161,7 @@ exports.getNewPasswordPage = (req, res) => {
     .catch((err) => console.log(err));
 };
 
+//Handle change new password
 exports.changeNewPassword = (req, res) => {
   const { password, confirm_password, user_id, resetToken } = req.body;
   let resetUser;

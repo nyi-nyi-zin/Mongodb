@@ -1,3 +1,4 @@
+//Import Post Schema
 const Post = require("../models/posts");
 
 exports.createPost = (req, res) => {
@@ -11,13 +12,11 @@ exports.createPost = (req, res) => {
 };
 
 exports.renderCreatePage = (req, res) => {
-  // res.sendFile(path.join(__dirname, "..", "views", "addPost.html"));
   res.render("addPost", { title: "Post create ml" });
 };
 
+//Render home page
 exports.renderHomePage = (req, res) => {
-  // const cookie = req.get("Cookie").split("=")[1].trim() === "true";
-
   Post.find()
     .select("title")
     .populate("userId", "email")
@@ -26,6 +25,9 @@ exports.renderHomePage = (req, res) => {
         res.render("home", {
           title: "Home Page",
           postsArr: posts,
+          currentUserEmail: req.session.userInfo
+            ? req.session.userInfo.email
+            : "",
         });
       }
     })
@@ -35,7 +37,13 @@ exports.renderHomePage = (req, res) => {
 exports.getPost = (req, res) => {
   const postId = req.params.postId;
   Post.findById(postId)
-    .then((post) => res.render("details", { title: "Post Details Page", post }))
+    .then((post) =>
+      res.render("details", {
+        title: "Post Details Page",
+        post,
+        currentLoginUserId: req.user ? req.user._id : "",
+      })
+    )
     .catch((err) => console.log(err));
 };
 
@@ -52,26 +60,30 @@ exports.getEditPost = (req, res) => {
 };
 
 exports.updatePost = (req, res) => {
-  //two way to update post
+  //two way to update post,From the params and from the req.body
   const postId = req.params.postId;
   const { title, description, photo } = req.body;
+
   Post.findById(postId)
     .then((post) => {
+      if (post.userId.toString() !== req.user._id.toString()) {
+        return res.redirect("/");
+      }
       post.title = title;
       post.description = description;
       post.imgUrl = photo;
-      return post.save();
+
+      return post.save().then(() => {
+        res.redirect("/");
+      });
     })
-    .then(() => {
-      console.log("post updated");
-      res.redirect("/");
-    })
+
     .catch((err) => console.log(err));
 };
 
 exports.deletePost = (req, res) => {
   const { postId } = req.params;
-  Post.findByIdAndDelete(postId)
+  Post.deleteOne({ _id: postId, userId: req.user._id })
     .then(res.redirect("/"))
     .catch((err) => console.log(err));
 };

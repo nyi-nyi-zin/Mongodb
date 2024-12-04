@@ -1,6 +1,6 @@
 const express = require("express");
-
 const router = express.Router();
+
 const postController = require("../controllers/post");
 
 // /admin/create-post
@@ -14,4 +14,5 @@ router.get("/edit/:postId", postController.getEditPost);
 router.post("/edit-post/:postId", postController.updatePost);
 
 router.post("/delete/:postId", postController.deletePost);
+
 module.exports = router;

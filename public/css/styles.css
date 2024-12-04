@@ -31,6 +31,7 @@ button {
   background-color: #000;
   padding: 8px 0;
   width: 100%;
+  cursor: pointer;
 }
 .mx-auto {
   width: 40%;
@@ -73,8 +74,15 @@ button {
 .msg-box-warn {
   width: 100%;
   text-align: center;
-
   border: 1px solid #fbff00;
   background-color: #d9eb36;
   padding: 4px 10px;
+}
+
+a {
+  cursor: pointer;
+}
+
+.delete-btn {
+  width: fit-content;
 }
