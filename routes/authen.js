@@ -28,9 +28,9 @@ router.get("/feedback", authController.getFeedbackPage);
 router.post("/reset", authController.resetLinkSend);
 
 //render change password page
-router.get("/reset-password/:token", authController.getNewPasswordPage);
+router.get("/reset-password/:token", authController.getNewpasswordPage);
 
 //change new password
-router.post("/change-new-password", authController.changeNewPassword);
+router.post("/change-new-password", authController.changeNewpassword);
 
 module.exports = router;

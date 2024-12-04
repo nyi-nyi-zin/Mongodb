@@ -1,13 +1,10 @@
-//Import User Schema
-const User = require("../models/user");
-
-//Import third party packages
 const bcrypt = require("bcrypt");
-const dotenv = require("dotenv").config();
-const nodemailer = require("nodemailer");
+const User = require("../models/user");
 const crypto = require("crypto");
 
-//configure third party package
+const nodemailer = require("nodemailer");
+const dotenv = require("dotenv").config();
+
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -16,58 +13,70 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-//Render Register Page
+// render register page
 exports.getRegisterPage = (req, res) => {
-  res.render("auth/register", {
-    title: "Register",
-    errorMsg: req.flash("error"),
-  });
+  let message = req.flash("error");
+  if (message.length > 0) {
+    message = message[0];
+  } else {
+    message = null;
+  }
+  res.render("auth/register", { title: "Register", errorMsg: message });
 };
 
-//Handle register page
+// handle register
 exports.registerAccount = (req, res) => {
   const { email, password } = req.body;
-  User.findOne({ email }).then((user) => {
-    if (user) {
-      req.flash("error", "Email is already exist");
-      return res.redirect("/register");
-    }
-    return bcrypt
-      .hash(password, 10)
-      .then((hashedpassword) => {
-        return User.create({ email, password: hashedpassword }).then((_) => {
-          res.redirect("/login");
-          transporter.sendMail({
-            from: process.env.SENDER_MAIL,
-            to: email,
-            subject: "Register Successful",
-            html: "<h1>Register Account successful.</h1><p>Created Account using this email</p>",
+  User.findOne({ email })
+    .then((user) => {
+      if (user) {
+        req.flash("error", "Email is already exist.");
+        return res.redirect("/register");
+      }
+      return bcrypt
+        .hash(password, 10)
+        .then((hashedPassword) => {
+          return User.create({
+            email,
+            password: hashedPassword,
           });
+        })
+        .then((_) => {
+          res.redirect("/login");
+          transporter.sendMail(
+            {
+              from: process.env.SENDER_MAIL,
+              to: email,
+              subject: "Register Successful",
+              html: "<h1>Register account successful.</h1><p>You have been created an account using this email address in blog.io</p>",
+            },
+            (err) => {
+              console.log(err);
+            }
+          );
         });
-      })
-      .catch((err) => console.log(err));
-  });
+    })
+    .catch((err) => console.log(err));
 };
 
-//Render feedback page
-exports.getFeedbackPage = (req, res) => {
-  res.render("auth/feedback", { title: "Succcess" });
-};
-
-//Render Login Page
+// render login page
 exports.getLoginPage = (req, res) => {
-  res.render("auth/login", { title: "Login", errorMsg: req.flash("error") });
+  let message = req.flash("error");
+  if (message.length > 0) {
+    message = message[0];
+  } else {
+    message = null;
+  }
+  res.render("auth/login", { title: "Login", errorMsg: message });
 };
 
-//Handle Login
+// handle login
 exports.postLoginData = (req, res) => {
   const { email, password } = req.body;
-  User.findOne({
-    email,
-  })
+  User.findOne({ email })
     .then((user) => {
       if (!user) {
-        req.flash("error", "Check your information and Try again");
+        req.flash("error", "Check your imformation and try again.");
         return res.redirect("/login");
       }
       bcrypt
@@ -88,22 +97,30 @@ exports.postLoginData = (req, res) => {
     .catch((err) => console.log(err));
 };
 
-//Handle Logout
+// handle logout
 exports.logout = (req, res) => {
   req.session.destroy((_) => {
     res.redirect("/");
   });
 };
 
-//Render reset password Page
+// render rest password page
 exports.getResetPage = (req, res) => {
-  res.render("auth/reset", {
-    title: "Reset Password",
-    errorMsg: req.flash("error"),
-  });
+  let message = req.flash("error");
+  if (message.length > 0) {
+    message = message[0];
+  } else {
+    message = null;
+  }
+  res.render("auth/reset", { title: "Reset Password", errorMsg: message });
 };
 
-//reset password link send
+// render feedback page
+exports.getFeedbackPage = (req, res) => {
+  res.render("auth/feedback", { title: "Success." });
+};
+
+// reset password link send
 exports.resetLinkSend = (req, res) => {
   const { email } = req.body;
   crypto.randomBytes(32, (err, buffer) => {
@@ -115,7 +132,7 @@ exports.resetLinkSend = (req, res) => {
     User.findOne({ email })
       .then((user) => {
         if (!user) {
-          req.flash("error", "No account found with this email");
+          req.flash("error", "No account found with this email.");
           return res.redirect("/reset-password");
         }
         user.resetToken = token;
@@ -129,7 +146,7 @@ exports.resetLinkSend = (req, res) => {
             from: process.env.SENDER_MAIL,
             to: email,
             subject: "Reset Password",
-            html: `<h1>Reset Password.</h1><p>Change your account password by clicking the link below</p><a href='http://localhost:8080/reset-password/${token}' target="_blank">Click me to Change password</a>`,
+            html: `<h1>Reset password.</h1><p>Change your account password by clicking the link below.</p><a href="http://localhost:8080/reset-password/${token}" target="_blank">Click me to change password !!</a>`,
           },
           (err) => {
             console.log(err);
@@ -142,15 +159,20 @@ exports.resetLinkSend = (req, res) => {
   });
 };
 
-//Render NewPassword page
-exports.getNewPasswordPage = (req, res) => {
+exports.getNewpasswordPage = (req, res) => {
   const { token } = req.params;
   User.findOne({ resetToken: token, tokenExpiration: { $gt: Date.now() } })
     .then((user) => {
       if (user) {
+        let message = req.flash("error");
+        if (message.length > 0) {
+          message = message[0];
+        } else {
+          message = null;
+        }
         res.render("auth/new-password", {
           title: "Change password",
-          errorMsg: req.flash("error"),
+          errorMsg: message,
           resetToken: token,
           user_id: user._id,
         });
@@ -161,9 +183,8 @@ exports.getNewPasswordPage = (req, res) => {
     .catch((err) => console.log(err));
 };
 
-//Handle change new password
-exports.changeNewPassword = (req, res) => {
-  const { password, confirm_password, user_id, resetToken } = req.body;
+exports.changeNewpassword = (req, res) => {
+  const { password, comfirm_password, user_id, resetToken } = req.body;
   let resetUser;
   User.findOne({
     resetToken,
@@ -171,7 +192,7 @@ exports.changeNewPassword = (req, res) => {
     _id: user_id,
   })
     .then((user) => {
-      if (password === confirm_password) {
+      if (password === comfirm_password) {
         resetUser = user;
         return bcrypt.hash(password, 10);
       }

@@ -1,8 +1,6 @@
-//Import Post Schema
-const Post = require("../models/posts");
+const Post = require("../models/post");
 
 exports.createPost = (req, res) => {
-  console.log(req.user);
   const { title, description, photo } = req.body;
   Post.create({ title, description, imgUrl: photo, userId: req.user })
     .then((result) => {
@@ -15,21 +13,19 @@ exports.renderCreatePage = (req, res) => {
   res.render("addPost", { title: "Post create ml" });
 };
 
-//Render home page
 exports.renderHomePage = (req, res) => {
   Post.find()
-    .select("title")
+    .select("title description")
     .populate("userId", "email")
+    .sort({ title: -1 })
     .then((posts) => {
-      {
-        res.render("home", {
-          title: "Home Page",
-          postsArr: posts,
-          currentUserEmail: req.session.userInfo
-            ? req.session.userInfo.email
-            : "",
-        });
-      }
+      res.render("home", {
+        title: "Homepage",
+        postsArr: posts,
+        currentUserEmail: req.session.userInfo
+          ? req.session.userInfo.email
+          : "",
+      });
     })
     .catch((err) => console.log(err));
 };
@@ -39,16 +35,18 @@ exports.getPost = (req, res) => {
   Post.findById(postId)
     .then((post) =>
       res.render("details", {
-        title: "Post Details Page",
+        title: post.title,
         post,
-        currentLoginUserId: req.user ? req.user._id : "",
+        currentLoginUserId: req.session.userInfo
+          ? req.session.userInfo._id
+          : "",
       })
     )
     .catch((err) => console.log(err));
 };
 
 exports.getEditPost = (req, res) => {
-  postId = req.params.postId;
+  const postId = req.params.postId;
   Post.findById(postId)
     .then((post) => {
       if (!post) {
@@ -60,9 +58,7 @@ exports.getEditPost = (req, res) => {
 };
 
 exports.updatePost = (req, res) => {
-  //two way to update post,From the params and from the req.body
-  const postId = req.params.postId;
-  const { title, description, photo } = req.body;
+  const { postId, title, description, photo } = req.body;
 
   Post.findById(postId)
     .then((post) => {
@@ -72,18 +68,20 @@ exports.updatePost = (req, res) => {
       post.title = title;
       post.description = description;
       post.imgUrl = photo;
-
       return post.save().then(() => {
+        console.log("Post Updated");
         res.redirect("/");
       });
     })
-
     .catch((err) => console.log(err));
 };
 
 exports.deletePost = (req, res) => {
   const { postId } = req.params;
   Post.deleteOne({ _id: postId, userId: req.user._id })
-    .then(res.redirect("/"))
+    .then(() => {
+      console.log("Post Deleted!!");
+      res.redirect("/");
+    })
     .catch((err) => console.log(err));
 };
