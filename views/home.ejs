@@ -48,7 +48,9 @@
   <% for(let post of postsArr) { %>
   <div class="post-box">
     <p class="post-title"><%= post.title %></p>
-    <p class="post-email">Post by : <%= post.userId.email %></p>
+    <p class="post-email">
+      Post by : <%= post.userId.email || 'Unknown User' %>
+    </p>
     <p class="post-des"><%= post.description.substr(0,198) %></p>
     <a class="" href="/post/<%= post._id %>">Read More</a>
     <hr />
