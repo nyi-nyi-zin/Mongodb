@@ -17,6 +17,8 @@ app.set("views", "views");
 //Import Schema
 const User = require("./models/user");
 
+const errorController = require("./controllers/error");
+
 //Import middlewares
 const { isLogin } = require("./middleware/is-login");
 
@@ -73,6 +75,9 @@ app.use((req, res, next) => {
 app.use("/admin", isLogin, adminRoutes);
 app.use(postRoutes);
 app.use(authRoutes);
+app.use(errorController.get500Page);
+
+app.all("*", errorController.get404Page);
 
 //Connect to data base and host server
 mongoose
