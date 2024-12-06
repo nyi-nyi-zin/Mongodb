@@ -85,9 +85,10 @@ exports.getLoginPage = (req, res) => {
 // handle login
 exports.postLoginData = (req, res) => {
   const { email, password } = req.body;
+
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    res.status(422).render("auth/login", {
+    return res.status(422).render("auth/login", {
       title: "Login",
       errorMsg: errors.array()[0].msg,
       oldFormData: { email, password },
@@ -132,7 +133,12 @@ exports.logout = (req, res) => {
   });
 };
 
-// render rest password page
+// render feedback page
+exports.getFeedbackPage = (req, res) => {
+  res.render("auth/feedback", { title: "Success." });
+};
+
+// render reset password link send page
 exports.getResetPage = (req, res) => {
   let message = req.flash("error");
   if (message.length > 0) {
@@ -140,17 +146,26 @@ exports.getResetPage = (req, res) => {
   } else {
     message = null;
   }
-  res.render("auth/reset", { title: "Reset Password", errorMsg: message });
+  res.render("auth/reset", {
+    title: "Reset Password",
+    errorMsg: message,
+    oldFormData: { email: "" },
+  });
 };
 
-// render feedback page
-exports.getFeedbackPage = (req, res) => {
-  res.render("auth/feedback", { title: "Success." });
-};
-
-// reset password link send
+//Handle reset password link send page
 exports.resetLinkSend = (req, res) => {
   const { email } = req.body;
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).render("auth/reset", {
+      title: "Reset Password",
+      errorMsg: errors.array()[0].msg,
+      oldFormData: { email },
+    });
+  }
+
   crypto.randomBytes(32, (err, buffer) => {
     if (err) {
       console.log(err);
@@ -160,8 +175,11 @@ exports.resetLinkSend = (req, res) => {
     User.findOne({ email })
       .then((user) => {
         if (!user) {
-          req.flash("error", "No account found with this email.");
-          return res.redirect("/reset-password");
+          return res.render("auth/reset", {
+            title: "Reset Password",
+            errorMsg: "No user found with that email",
+            oldFormData: { email },
+          });
         }
         user.resetToken = token;
         user.tokenExpiration = Date.now() + 1800000;
@@ -169,7 +187,7 @@ exports.resetLinkSend = (req, res) => {
       })
       .then((result) => {
         res.redirect("/feedback");
-        transporter.sendMail(
+        return transporter.sendMail(
           {
             from: process.env.SENDER_MAIL,
             to: email,
@@ -187,8 +205,18 @@ exports.resetLinkSend = (req, res) => {
   });
 };
 
+//Handle reset password page
 exports.getNewpasswordPage = (req, res) => {
   const { token } = req.params;
+
+  // const errors = validationResult(req);
+  // if (!errors.isEmpty()) {
+  //   return res.status(422).render("auth/reset", {
+  //     title: "Reset Password",
+  //     errorMsg: errors.arrary()[0].msg,
+  //     oldFormData: { email },
+  //   });
+  // }
   User.findOne({ resetToken: token, tokenExpiration: { $gt: Date.now() } })
     .then((user) => {
       if (user) {

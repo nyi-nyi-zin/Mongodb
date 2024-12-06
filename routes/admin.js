@@ -1,17 +1,43 @@
 const express = require("express");
 const router = express.Router();
+const { body } = require("express-validator");
 
 const postController = require("../controllers/post");
 
 // /admin/create-post
 router.get("/create-post", postController.renderCreatePage);
 
-router.post("/", postController.createPost);
+router.post(
+  "/",
+  [
+    body("title")
+      .isLength({ min: 10 })
+      .withMessage("Please enter more than 10 words"),
+    body("photo").isURL().withMessage("Please add valid photo"),
+    body("description")
+      .isLength({ min: 30 })
+      .withMessage("Please add more than 30 words"),
+  ],
+  postController.createPost
+);
 
+//render edit post
 router.get("/edit/:postId", postController.getEditPost);
 
-//two way to update Post
-router.post("/edit-post/:postId", postController.updatePost);
+//handle edit post
+router.post(
+  "/edit-post",
+  [
+    body("title")
+      .isLength({ min: 10 })
+      .withMessage("Please enter more than 10 words"),
+    body("photo").isURL().withMessage("Please add valid photo"),
+    body("description")
+      .isLength({ min: 30 })
+      .withMessage("Please add more than 30 words"),
+  ],
+  postController.updatePost
+);
 
 router.post("/delete/:postId", postController.deletePost);
 
