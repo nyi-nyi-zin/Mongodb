@@ -13,7 +13,6 @@ router.post(
     body("title")
       .isLength({ min: 10 })
       .withMessage("Please enter more than 10 words"),
-    body("photo").isURL().withMessage("Please add valid photo"),
     body("description")
       .isLength({ min: 30 })
       .withMessage("Please add more than 30 words"),
@@ -31,7 +30,6 @@ router.post(
     body("title")
       .isLength({ min: 10 })
       .withMessage("Please enter more than 10 words"),
-    body("photo").isURL().withMessage("Please add valid photo"),
     body("description")
       .isLength({ min: 30 })
       .withMessage("Please add more than 30 words"),
