@@ -1,7 +1,6 @@
 <%- include("../includes/head") %>
 
 <section class="mx-auto">
-  <a href="/">Go back home</a>
   <h1 class="title form-title">Login account</h1>
   <% if(errorMsg){ %>
   <p class="msg-box"><%= errorMsg %></p>
@@ -14,8 +13,7 @@
         type="text"
         id="email"
         name="email"
-        value="<%=
-      oldFormData.email%>"
+        value="<%= oldFormData.email %>"
       />
     </div>
     <div>
@@ -24,8 +22,7 @@
         type="password"
         id="password"
         name="password"
-        value="<%=
-      oldFormData.password%>"
+        value="<%= oldFormData.password %>"
       />
     </div>
     <a href="/reset-password">Forget password ?</a>

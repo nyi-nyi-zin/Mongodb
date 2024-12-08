@@ -2,12 +2,14 @@ const Post = require("../models/post");
 const { validationResult } = require("express-validator");
 const { formatISO9075 } = require("date-fns");
 const pdf = require("pdf-creator-node");
+
 const fs = require("fs");
 const expath = require("path");
 
-const { fileDelete } = require("../utils/fileDelete");
+const fileDelete = require("../utils/fileDelete");
 
-const POST_PER_PAGE = 3;
+const POST_PAR_PAGE = 6;
+
 exports.createPost = (req, res, next) => {
   const { title, description } = req.body;
   const image = req.file;
@@ -15,22 +17,17 @@ exports.createPost = (req, res, next) => {
 
   if (image === undefined) {
     return res.status(422).render("addPost", {
-      title: "Post create ml",
-      errorMsg: "Image extension must be jpg,png or jpeg",
-      oldFormData: {
-        title,
-        description,
-      },
+      title: "Post create",
+      errorMsg: "Image extension must be jpg,png and jpeg.",
+      oldFormData: { title, description },
     });
   }
+
   if (!errors.isEmpty()) {
     return res.status(422).render("addPost", {
-      title: "Post create ml",
+      title: "Post create",
       errorMsg: errors.array()[0].msg,
-      oldFormData: {
-        title,
-        description,
-      },
+      oldFormData: { title, description },
     });
   }
 
@@ -40,57 +37,51 @@ exports.createPost = (req, res, next) => {
     })
     .catch((err) => {
       console.log(err);
-      const error = new Error("Something went wrong when creating post");
+      const error = new Error("Something Went Wrong");
       return next(error);
     });
 };
 
 exports.renderCreatePage = (req, res, next) => {
   res.render("addPost", {
-    title: "Post create ml",
+    title: "Post create",
+    oldFormData: { title: "", description: "", photo: "" },
     errorMsg: "",
-    oldFormData: {
-      title: "",
-      description: "",
-      photo: "",
-    },
   });
 };
 
 exports.renderHomePage = (req, res, next) => {
   const pageNumber = +req.query.page || 1;
   let totalPostNumber;
-  console.log(pageNumber);
   Post.find()
     .countDocuments()
     .then((totalPostCount) => {
       totalPostNumber = totalPostCount;
-
       return Post.find()
-        .select("title description")
+        .select("title description imgUrl")
         .populate("userId", "email")
-        .skip((pageNumber - 1) * POST_PER_PAGE)
-        .limit(POST_PER_PAGE)
-        .sort({ createAt: -1 });
+        .skip((pageNumber - 1) * POST_PAR_PAGE)
+        .limit(POST_PAR_PAGE)
+        .sort({ createdAt: -1 });
     })
     .then((posts) => {
       if (posts.length > 0) {
-        res.render("home", {
+        return res.render("home", {
           title: "Homepage",
           postsArr: posts,
-          currentUserEmail: req.session.userInfo
-            ? req.session.userInfo.email
-            : "",
+          // currentUserEmail: req.session.userInfo
+          //   ? req.session.userInfo.email
+          //   : "",
           currentPage: pageNumber,
-          hasNextPage: POST_PER_PAGE * pageNumber < totalPostNumber,
+          hasNextPage: POST_PAR_PAGE * pageNumber < totalPostNumber,
           hasPreviousPage: pageNumber > 1,
           nextPage: pageNumber + 1,
           previousPage: pageNumber - 1,
         });
       } else {
-        res.status(500).render("error/500", {
-          title: "Something went wrong",
-          message: "No post in this page",
+        return res.status(500).render("error/500", {
+          title: "Something went wrong.",
+          message: "no post in this page query.",
         });
       }
     })
@@ -105,7 +96,7 @@ exports.getPost = (req, res, next) => {
   const postId = req.params.postId;
   Post.findById(postId)
     .populate("userId", "email")
-    .then((post) =>
+    .then((post) => {
       res.render("details", {
         title: post.title,
         post,
@@ -115,16 +106,15 @@ exports.getPost = (req, res, next) => {
         currentLoginUserId: req.session.userInfo
           ? req.session.userInfo._id
           : "",
-      })
-    )
+      });
+    })
     .catch((err) => {
       console.log(err);
-      const error = new Error("Post not found with this Id");
+      const error = new Error("Post not found with this ID.");
       return next(error);
     });
 };
 
-//Render edit post
 exports.getEditPost = (req, res, next) => {
   const postId = req.params.postId;
   Post.findById(postId)
@@ -151,24 +141,22 @@ exports.getEditPost = (req, res, next) => {
     });
 };
 
-//handle update post
 exports.updatePost = (req, res, next) => {
   const { postId, title, description } = req.body;
+
   const image = req.file;
   const errors = validationResult(req);
+
   if (!errors.isEmpty()) {
     return res.status(422).render("editPost", {
       postId,
       title,
       errorMsg: errors.array()[0].msg,
-
-      oldFormData: {
-        title,
-        description,
-      },
+      oldFormData: { title, description },
       isValidationFail: true,
     });
   }
+
   Post.findById(postId)
     .then((post) => {
       if (post.userId.toString() !== req.user._id.toString()) {
@@ -192,7 +180,6 @@ exports.updatePost = (req, res, next) => {
     });
 };
 
-//Handle delete post
 exports.deletePost = (req, res, next) => {
   const { postId } = req.params;
   Post.findById(postId)
@@ -226,7 +213,7 @@ exports.savePostAsPDF = (req, res, next) => {
     orientation: "portrait",
     border: "10mm",
     header: {
-      height: "45mm",
+      height: "20mm",
       contents:
         '<h4 style="text-align: center;">PDF DOWNLOAD FROM BLOG.IO</h4>',
     },

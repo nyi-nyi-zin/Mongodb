@@ -1,8 +1,7 @@
 <%- include("./includes/head") %>
 
 <section class="mx-auto">
-  <a href="/">Go back home</a>
-  <h1 class="title form-title">Add a new post here!</h1>
+  <h1 class="title">Add a new post here!</h1>
   <% if(errorMsg){ %>
   <p class="msg-box"><%= errorMsg %></p>
   <% }%>
@@ -10,7 +9,7 @@
     <input hidden value="<%= csrfToken %>" name="_csrf" />
     <input
       type="text"
-      value="<%=  isValidationFail ? postId : post._id  %>"
+      value="<%= isValidationFail ? postId : post._id %>"
       name="postId"
       hidden
     />
@@ -20,7 +19,8 @@
         type="text"
         id="title"
         name="title"
-        value="<%= isValidationFail ?  oldFormData.title : post.title %>"
+        value="<%= isValidationFail ? oldFormData.title : post.title %>"
+        required
       />
     </div>
     <div>
@@ -30,7 +30,7 @@
     <div>
       <label for="description">Enter description</label>
       <textarea name="description" id="description" cols="30" rows="10">
-    <%= isValidationFail ?  oldFormData.description : post.description %></textarea
+<%= isValidationFail ? oldFormData.description : post.description %></textarea
       >
     </div>
     <button>Update Post</button>
