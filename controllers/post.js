@@ -7,6 +7,7 @@ const expath = require("path");
 
 const { fileDelete } = require("../utils/fileDelete");
 
+const POST_PER_PAGE = 3;
 exports.createPost = (req, res, next) => {
   const { title, description } = req.body;
   const image = req.file;
@@ -22,7 +23,6 @@ exports.createPost = (req, res, next) => {
       },
     });
   }
-
   if (!errors.isEmpty()) {
     return res.status(422).render("addPost", {
       title: "Post create ml",
@@ -58,18 +58,41 @@ exports.renderCreatePage = (req, res, next) => {
 };
 
 exports.renderHomePage = (req, res, next) => {
+  const pageNumber = +req.query.page || 1;
+  let totalPostNumber;
+  console.log(pageNumber);
   Post.find()
-    .select("title description")
-    .populate("userId", "email")
-    .sort({ title: -1 })
+    .countDocuments()
+    .then((totalPostCount) => {
+      totalPostNumber = totalPostCount;
+
+      return Post.find()
+        .select("title description")
+        .populate("userId", "email")
+        .skip((pageNumber - 1) * POST_PER_PAGE)
+        .limit(POST_PER_PAGE)
+        .sort({ createAt: -1 });
+    })
     .then((posts) => {
-      res.render("home", {
-        title: "Homepage",
-        postsArr: posts,
-        currentUserEmail: req.session.userInfo
-          ? req.session.userInfo.email
-          : "",
-      });
+      if (posts.length > 0) {
+        res.render("home", {
+          title: "Homepage",
+          postsArr: posts,
+          currentUserEmail: req.session.userInfo
+            ? req.session.userInfo.email
+            : "",
+          currentPage: pageNumber,
+          hasNextPage: POST_PER_PAGE * pageNumber < totalPostNumber,
+          hasPreviousPage: pageNumber > 1,
+          nextPage: pageNumber + 1,
+          previousPage: pageNumber - 1,
+        });
+      } else {
+        res.status(500).render("error/500", {
+          title: "Something went wrong",
+          message: "No post in this page",
+        });
+      }
     })
     .catch((err) => {
       console.log(err);
