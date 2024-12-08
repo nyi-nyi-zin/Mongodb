@@ -25,7 +25,7 @@ const { isLogin } = require("./middleware/is-login");
 
 //Database setup
 const store = new mongoStore({
-  uri: process.env.MONGODB_URL,
+  uri: process.env.MONGODB_URI,
   collection: "sessions",
 });
 
@@ -114,6 +114,6 @@ mongoose
   .connect(process.env.MONGODB_URL)
   .then((result) => {
     app.listen(8080);
-    console.log("connected to server");
+    console.log("connected to mongodb");
   })
   .catch((err) => console.log(err));

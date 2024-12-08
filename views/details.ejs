@@ -4,10 +4,12 @@
     <h1><%= post.title %></h1>
     <a href="/">Go back</a>
   </div>
+
   <p class="tmp">Post by - <%= post.userId.email %></p>
   <% if(date) {%>
   <p class="tmp">Upload at -<%= date%></p>
   <% } %>
+  <a href="/save/<%= post._id %>">Save to device</a>
 
   <img src="<%='/'+ post.imgUrl %>" alt="<%= post.title %>" />
   <hr />
