@@ -198,7 +198,6 @@ exports.savePostAsPDF = (req, res, next) => {
     "../views/template/template.html"
   )}`;
   const html = fs.readFileSync(templateUrl, "utf8");
-
   const options = {
     format: "A3",
     orientation: "portrait",
@@ -206,18 +205,9 @@ exports.savePostAsPDF = (req, res, next) => {
     header: {
       height: "45mm",
       contents:
-        '<h4 style="text-align: center;">PDF Download From Blog.io</h4>',
-    },
-    footer: {
-      height: "28mm",
-      contents: {
-        first: "Cover page",
-        contents:
-          '<span style="color: #444; text-align: center">@nyinyizin.mm</span>',
-      },
+        '<h4 style="text-align: center;">PDF DOWNLOAD FROM BLOG.IO</h4>',
     },
   };
-
   Post.findById(id)
     .populate("userId", "email")
     .lean()
@@ -245,8 +235,8 @@ exports.savePostAsPDF = (req, res, next) => {
             fileDelete(pdfSaveUrl);
           });
         })
-        .catch((err) => {
-          console.log(err);
+        .catch((error) => {
+          console.error(error);
         });
     })
     .catch((err) => {
