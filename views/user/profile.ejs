@@ -1,13 +1,8 @@
-<%- include("./includes/head") %>
+<%- include("../includes/head") %>
 <section class="header">
-  <h1 class="title">Recent posts</h1>
-  <% if(postsArr.length === 0 && isLogin) { %>
-  <div>
-    <h4>Nothing to see ?</h4>
-    <p>Create a new post now !!!</p>
-    <a href="/admin/create-post">Create a new post</a>
-  </div>
-  <% } %>
+  <h1 class="title">Post By <%= currentUserEmail %></h1>
+
+  <i class="fa-solid fa-user"></i>
   <div class="post-container">
     <% for(let post of postsArr) { %>
     <div class="post-box">
@@ -26,13 +21,13 @@
     <% } %>
   </div>
   <div class="paginate">
-    <% if(!hasNextPage && currentPage == 1) {%>
-    <a href="/?page=2">Next Page</a>
-    <% } %> <% if(hasNextPage) {%>
-    <a href="/?page=<%= nextPage%>">Next Page <%= nextPage%></a>
+    <% if(hasNextPage) {%>
+    <a href="/admin/profile?page=<%= nextPage%>">Next Page <%= nextPage%></a>
     <% } %> <% if(hasPreviousPage) {%>
-    <a href="/?page=<%= previousPage%>">Previous Page <%= previousPage%></a>
+    <a href="/admin/profile?page=<%= previousPage%>"
+      >Previous Page <%= previousPage%></a
+    >
     <% } %>
   </div>
 </section>
-<%- include("./includes/foot") %>
+<%- include("../includes/foot") %>

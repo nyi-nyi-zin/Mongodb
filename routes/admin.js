@@ -4,6 +4,8 @@ const { body } = require("express-validator");
 
 const postController = require("../controllers/post");
 
+const userController = require("../controllers/user");
+
 // /admin/create-post
 router.get("/create-post", postController.renderCreatePage);
 
@@ -38,5 +40,7 @@ router.post(
 );
 
 router.post("/delete/:postId", postController.deletePost);
+
+router.get("/profile", userController.getProfile);
 
 module.exports = router;
