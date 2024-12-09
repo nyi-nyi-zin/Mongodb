@@ -1,10 +1,9 @@
 const express = require("express");
+
 const router = express.Router();
-const { body } = require("express-validator");
-
 const postController = require("../controllers/post");
-
 const userController = require("../controllers/user");
+const { body } = require("express-validator");
 
 // /admin/create-post
 router.get("/create-post", postController.renderCreatePage);
@@ -14,27 +13,25 @@ router.post(
   [
     body("title")
       .isLength({ min: 10 })
-      .withMessage("Please enter more than 10 words"),
+      .withMessage("Title must have 10 letters."),
     body("description")
       .isLength({ min: 30 })
-      .withMessage("Please add more than 30 words"),
+      .withMessage("Description must have 30 letters."),
   ],
   postController.createPost
 );
 
-//render edit post
 router.get("/edit/:postId", postController.getEditPost);
 
-//handle edit post
 router.post(
   "/edit-post",
   [
     body("title")
       .isLength({ min: 10 })
-      .withMessage("Please enter more than 10 words"),
+      .withMessage("Title must have 10 letters."),
     body("description")
       .isLength({ min: 30 })
-      .withMessage("Please add more than 30 words"),
+      .withMessage("Description must have 30 letters."),
   ],
   postController.updatePost
 );
@@ -42,5 +39,17 @@ router.post(
 router.post("/delete/:postId", postController.deletePost);
 
 router.get("/profile", userController.getProfile);
+
+router.get("/username", userController.renderUsernamePage);
+
+router.post(
+  "/setusername",
+  body("username")
+    .isLength({ min: 4 })
+    .withMessage("Username must have 4 letters."),
+  userController.setUsername
+);
+
+router.get("/premium", userController.renderPremiumPage);
 
 module.exports = router;

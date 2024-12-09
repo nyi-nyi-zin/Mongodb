@@ -21,7 +21,15 @@
       >
       <p class="post-des"><%= post.description.substr(0,100) %></p>
       <hr />
-      <p class="post-email">Post by : <%= post.userId.email %></p>
+      <% if(post.userId._id.toString() == currentUserID.toString() ){%>
+      <a href="/admin/profile" class="post-email"
+        ><span>Post by : </span><%= post.userId.email %></a
+      >
+      <%}else{%>
+      <a href="/profile/<%= post.userId._id %>" class="post-email"
+        ><span>Post by : </span><%= post.userId.email %></a
+      >
+      <%}%>
     </div>
     <% } %>
   </div>
@@ -34,5 +42,5 @@
     <a href="/?page=<%= previousPage%>">Previous Page <%= previousPage%></a>
     <% } %>
   </div>
+  <%- include("./includes/foot") %>
 </section>
-<%- include("./includes/foot") %>
