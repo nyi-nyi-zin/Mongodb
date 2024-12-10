@@ -7,7 +7,19 @@
       <li>Animate profile badge</li>
       <li>Can set username unlimited</li>
     </ul>
-    <p>Buy IO premium</p>
+    <button class="checkout-btn">Buy IO premium</button>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+      var stripe = Stripe(
+        "pk_test_51OXRstDezEDweoOhyI0nedsKY4kHVb9Nl63l2XLRzl7uAZPj9dUfOPbjW1pOo6uYkRxdP2twWF3hexfIlXm2mArT00Kjk2dtNl"
+      );
+      var checkoutBtn = document.querySelector(".checkout-btn");
+      checkoutBtn.addEventListener("click", function () {
+        stripe.redirectToCheckout({
+          sessionId: "<%=session_id %>",
+        });
+      });
+    </script>
   </div>
 </section>
 
