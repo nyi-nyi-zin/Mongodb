@@ -2,18 +2,16 @@
 <section class="header">
   <div class="public-user">
     <i class="fa-solid fa-circle-user"></i>
-    <p class=""><%= currentUserEmail%></p>
-    <%if( postsArr[0].userId.username ){ %>
-    <p class="premium-username">
-      <%= postsArr[0].userId.username %> <% if(postsArr[0].userId.isPremium) {
-      %>
-      <i
-        class="fa-regular fa-star animate__animated animate__bounce animate__flash animate__infinite infinite"
-      ></i>
+    <p class="">
+      <% if(postsArr[0].userId.username) {%>
+        <p class="premium-username"><%= postsArr[0].userId.username %>
+          <% if(postsArr[0].userId.isPremium){ %>
+          <i class="fa-regular fa-star animate__animated animate__jello animate__infinite	infinite"></i></p>
+          <%}%>
+      <%}else{%>
+          <p class="premium-username"><%= postsArr[0].userId.username %></p>
+      <%}%>
     </p>
-    <%}%> <% }else{ %>
-    <p><%= postsArr[0].userId.username %></p>
-    <% } %>
   </div>
   <div class="post-container">
     <% for(let post of postsArr) { %>
@@ -28,7 +26,6 @@
       >
       <p class="post-des"><%= post.description.substr(0,100) %></p>
       <hr />
-      <p class="post-email">Post by : <%= post.userId.email %></p>
     </div>
     <% } %>
   </div>
