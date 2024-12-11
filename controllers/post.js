@@ -1,6 +1,6 @@
 const Post = require("../models/post");
 const { validationResult } = require("express-validator");
-const formatISO9075 = require("date-fns/formatISO9075");
+const { formatISO9075 } = require("date-fns");
 const pdf = require("pdf-creator-node");
 
 const fs = require("fs");
@@ -12,6 +12,7 @@ const POST_PAR_PAGE = 6;
 
 exports.createPost = (req, res, next) => {
   const { title, description } = req.body;
+
   const image = req.file;
   const errors = validationResult(req);
 
@@ -59,7 +60,7 @@ exports.renderHomePage = (req, res, next) => {
       totalPostNumber = totalPostCount;
       return Post.find()
         .select("title description imgUrl")
-        .populate("userId", "email isPremium username")
+        .populate("userId", "email isPremium username profile_imgUrl")
         .skip((pageNumber - 1) * POST_PAR_PAGE)
         .limit(POST_PAR_PAGE)
         .sort({ createdAt: -1 });
@@ -92,9 +93,13 @@ exports.renderHomePage = (req, res, next) => {
 
 exports.getPost = (req, res, next) => {
   const postId = req.params.postId;
+
   Post.findById(postId)
     .populate("userId", "email isPremium")
     .then((post) => {
+      if (!post) {
+        console.log("No post found with this ID");
+      }
       res.render("details", {
         title: post.title,
         post,

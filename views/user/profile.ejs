@@ -1,26 +1,39 @@
-<%- include("../includes/head") %>
+<%- include("../includes/head") %> <% if(postsArr.length > 0){ %>
 <section class="header">
   <div class="own-user">
     <div class="ic-email">
-      <i class="fa-solid fa-circle-user"></i>
+      <% if(postsArr[0].userId.isPremium && postsArr[0].userId.profile_imgUrl ){
+      %>
+      <img
+        src="<%='/'+ postsArr[0].userId.profile_imgUrl %>"
+        alt="profile-image"
+        class="profile-photo"
+      />
+      <% } %>
+
       <p class=""><%= currentUserEmail%></p>
-      <p class="">
-        <% if(postsArr[0].userId.username) {%>
-          <p class="premium-username"><%= postsArr[0].userId.username %>
-            <% if(postsArr[0].userId.isPremium){ %>
-            <i class="fa-regular fa-star animate__animated animate__jello animate__infinite	infinite"></i></p>
-            <%}%>
-        <%}else{%>
-            <p class="premium-username"><%= postsArr[0].userId.username %></p>
-        <%}%>
+
+      <% if(postsArr[0].userId.username) {%>
+      <p class="premium-username">
+        <%= postsArr[0].userId.username %> <% if(postsArr[0].userId.isPremium){
+        %>
+        <i
+          class="fa-regular fa-star animate__animated animate__jello animate__infinite infinite"
+        ></i>
       </p>
+      <%}%> <%}else{%>
+      <p class="premium-username"><%= postsArr[0].userId.username %></p>
+      <%}%>
     </div>
     <div class="own-user-right">
       <a href="/admin/username">Set username</a>
+
       <% if(postsArr[0].userId.isPremium){ %>
-        <a href="/admin/premium-details">IO premium status</a>
-        <% }else{ %>
-          <a href="/admin/premium">Buy IO premium</a>
+      <a href="/admin/profile-image">Upload Profile</a>
+
+      <a href="/admin/premium-details">IO premium status</a>
+      <% }else{ %>
+      <a href="/admin/premium">Buy IO premium</a>
       <% } %>
     </div>
   </div>
@@ -50,4 +63,7 @@
     <% } %>
   </div>
 </section>
-<%- include("../includes/foot") %>
+<%}else{%>
+<h1>Create A New Post First</h1>
+<a href="/admin/create-post">Create Post</a>
+<% } %> <%- include("../includes/foot") %>
