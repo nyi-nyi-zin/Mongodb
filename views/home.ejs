@@ -1,6 +1,5 @@
 <%- include("./includes/head") %>
 <section class="header">
-  <h1 class="title">Recent posts</h1>
   <% if(postsArr.length === 0 && isLogin) { %>
   <div>
     <h4>Nothing to see ?</h4>
@@ -17,34 +16,27 @@
         class="post-box-img"
       />
       <a class="post-title" href="/post/<%= post._id %>"
-        ><%= post.title.substr(0,20) %></a
+        ><%= post.title.substr(0,40) %></a
       >
       <p class="post-des"><%= post.description.substr(0,100) %></p>
       <hr />
-
       <div class="user-index">
         <% if(post.userId._id.toString() == currentUserID.toString() ){%>
-        <a href="/admin/profile" class="index-user-ic">
-          <% if(post.userId.isPremium && post.userId.profile_imgUrl ){ %>
-          <img
-            src="<%='/'+ post.userId.profile_imgUrl %>"
-            alt="post.userId.username"
-            class="profile-photo-home"
-          />
-          <% }else{ %><i class="fa-solid fa-circle-user"></i><% } %></a
-        >
+        <a href="/admin/profile" class=""
+          >
+          <% if(post.userId.profile_imgUrl && post.userId.isPremium ){ %>
+            <img src="<%= '/' + post.userId.profile_imgUrl %>" alt="<%= post.userId.username %>" class="profile-photo-home" />
+            <% }else{ %>
+              <i class="fa-solid fa-circle-user index-user-ic"></i>
+              <% } %></a>
         <%}else{%>
-        <a href="/profile/<%= post.userId._id %>" class="index-user-ic"
-          ><% if(post.userId.isPremium && post.userId.profile_imgUrl ){ %>
-          <img
-            src="<%='/'+ post.userId.profile_imgUrl %>"
-            alt="post.userId.username"
-            class="profile-photo-home"
-          />
-          <% }else{ %><i class="fa-solid fa-circle-user"></i><% } %></a
-        >
+        <a href="/profile/<%= post.userId._id %>" class=""
+          ><% if(post.userId.profile_imgUrl && post.userId.isPremium ){ %>
+            <img src="<%= '/' + post.userId.profile_imgUrl %>" alt="<%= post.userId.username %>" class="profile-photo-home" />
+            <% }else{ %>
+              <i class="fa-solid fa-circle-user index-user-ic"></i>
+              <% } %></a></a>
         <%}%>
-
         <div>
           <p class="post-email"><%= post.userId.email %></p>
           <% if(post.userId.isPremium){%>

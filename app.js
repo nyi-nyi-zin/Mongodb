@@ -1,38 +1,35 @@
-//Import packages
 const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const app = express();
-require("dotenv").config();
+const dotenv = require("dotenv").config();
 const session = require("express-session");
 const mongoStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
 const flash = require("connect-flash");
 const multer = require("multer");
 
-//Configure view engine
+const app = express();
+
 app.set("view engine", "ejs");
 app.set("views", "views");
 
-//Import Schema
+const postRoutes = require("./routes/post");
+const adminRoutes = require("./routes/admin");
+const authRoutes = require("./routes/auth");
+
 const User = require("./models/user");
 
 const errorController = require("./controllers/error");
 
-//Import middlewares
 const { isLogin } = require("./middleware/is-login");
 
-//Database setup
 const store = new mongoStore({
   uri: process.env.MONGODB_URI,
   collection: "sessions",
 });
 
-//Import routes
-const postRoutes = require("./routes/post");
-const adminRoutes = require("./routes/admin");
-const authRoutes = require("./routes/authen");
+const csrfProtect = csrf();
 
 const storageConfigure = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -56,7 +53,6 @@ const fileFilterConfigure = (req, file, cb) => {
   }
 };
 
-//Configure others necessary things
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -66,6 +62,7 @@ app.use(
     "photo"
   )
 );
+
 app.use(
   session({
     secret: process.env.SESSION_KEY,
@@ -74,46 +71,40 @@ app.use(
     store,
   })
 );
-
-//Register third party packages
-const csrfProtect = csrf();
-app.use(flash());
 app.use(csrfProtect);
+app.use(flash());
 
-//Middleware
 app.use((req, res, next) => {
   if (req.session.isLogin === undefined) {
     return next();
   }
   User.findById(req.session.userInfo._id)
-    .select("_id email")
+    .select("_id email isPremium")
     .then((user) => {
       req.user = user;
       next();
-    })
-    .catch((err) => console.log(err));
+    });
 });
 
-//Middleware
+// to send csrf token for every page render
 app.use((req, res, next) => {
   res.locals.isLogin = req.session.isLogin ? true : false;
   res.locals.csrfToken = req.csrfToken();
   next();
 });
 
-//Register routes
 app.use("/admin", isLogin, adminRoutes);
 app.use(postRoutes);
 app.use(authRoutes);
-app.use(errorController.get500Page);
 
 app.all("*", errorController.get404Page);
 
-//Connect to data base and host server
+app.use(errorController.get500Page);
+
 mongoose
   .connect(process.env.MONGODB_URL)
-  .then((result) => {
+  .then((_) => {
     app.listen(8080);
-    console.log("connected to mongodb");
+    console.log("connected to mongodb!!!");
   })
   .catch((err) => console.log(err));

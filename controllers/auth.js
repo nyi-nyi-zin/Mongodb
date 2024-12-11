@@ -88,18 +88,19 @@ exports.postLoginData = (req, res) => {
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(422).render("auth/login", {
+    res.status(422).render("auth/login", {
       title: "Login",
       errorMsg: errors.array()[0].msg,
       oldFormData: { email, password },
     });
   }
+
   User.findOne({ email })
     .then((user) => {
       if (!user) {
         return res.status(422).render("auth/login", {
           title: "Login",
-          errorMsg: "Please enter valid email and password",
+          errorMsg: "Please enter vaild email and password.",
           oldFormData: { email, password },
         });
       }
@@ -110,14 +111,13 @@ exports.postLoginData = (req, res) => {
             req.session.isLogin = true;
             req.session.userInfo = user;
             return req.session.save((err) => {
+              res.redirect("/");
               console.log(err);
-              return res.redirect("/");
             });
           }
-
           res.status(422).render("auth/login", {
             title: "Login",
-            errorMsg: "Please enter valid email and password",
+            errorMsg: "Please enter vaild email and password.",
             oldFormData: { email, password },
           });
         })
@@ -133,13 +133,8 @@ exports.logout = (req, res) => {
   });
 };
 
-// render feedback page
-exports.getFeedbackPage = (req, res) => {
-  res.render("auth/feedback", { title: "Success." });
-};
-
-// render reset password link send page
-exports.getResetPage = (req, res) => {
+// render rest password page
+exports.getResetpage = (req, res) => {
   let message = req.flash("error");
   if (message.length > 0) {
     message = message[0];
@@ -153,7 +148,14 @@ exports.getResetPage = (req, res) => {
   });
 };
 
-//Handle reset password link send page
+// render feedback page
+exports.getFeedbackPage = (req, res) => {
+  res.render("auth/feedback", {
+    title: "Success.",
+  });
+};
+
+// reset password link send
 exports.resetLinkSend = (req, res) => {
   const { email } = req.body;
 
@@ -175,9 +177,9 @@ exports.resetLinkSend = (req, res) => {
     User.findOne({ email })
       .then((user) => {
         if (!user) {
-          return res.render("auth/reset", {
+          return res.status(422).render("auth/reset", {
             title: "Reset Password",
-            errorMsg: "No user found with that email",
+            errorMsg: "No account exist with this email address.",
             oldFormData: { email },
           });
         }
@@ -187,7 +189,7 @@ exports.resetLinkSend = (req, res) => {
       })
       .then((result) => {
         res.redirect("/feedback");
-        return transporter.sendMail(
+        transporter.sendMail(
           {
             from: process.env.SENDER_MAIL,
             to: email,
@@ -205,18 +207,8 @@ exports.resetLinkSend = (req, res) => {
   });
 };
 
-//Handle reset password page
 exports.getNewpasswordPage = (req, res) => {
   const { token } = req.params;
-
-  // const errors = validationResult(req);
-  // if (!errors.isEmpty()) {
-  //   return res.status(422).render("auth/reset", {
-  //     title: "Reset Password",
-  //     errorMsg: errors.arrary()[0].msg,
-  //     oldFormData: { email },
-  //   });
-  // }
   User.findOne({ resetToken: token, tokenExpiration: { $gt: Date.now() } })
     .then((user) => {
       if (user) {
@@ -242,17 +234,18 @@ exports.getNewpasswordPage = (req, res) => {
 
 exports.changeNewpassword = (req, res) => {
   const { password, confirm_password, user_id, resetToken } = req.body;
+
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).render("auth/new-password", {
       title: "Change password",
-
       resetToken,
       user_id,
       errorMsg: errors.array()[0].msg,
       oldFormData: { password, confirm_password },
     });
   }
+
   let resetUser;
   User.findOne({
     resetToken,

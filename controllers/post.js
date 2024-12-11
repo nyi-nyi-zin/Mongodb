@@ -8,11 +8,10 @@ const expath = require("path");
 
 const fileDelete = require("../utils/fileDelete");
 
-const POST_PAR_PAGE = 6;
+const POST_PAR_PAGE = 4;
 
 exports.createPost = (req, res, next) => {
   const { title, description } = req.body;
-
   const image = req.file;
   const errors = validationResult(req);
 
@@ -93,13 +92,10 @@ exports.renderHomePage = (req, res, next) => {
 
 exports.getPost = (req, res, next) => {
   const postId = req.params.postId;
-
+  console.log(req.user);
   Post.findById(postId)
     .populate("userId", "email isPremium")
     .then((post) => {
-      if (!post) {
-        console.log("No post found with this ID");
-      }
       res.render("details", {
         title: post.title,
         post,
@@ -109,9 +105,7 @@ exports.getPost = (req, res, next) => {
         currentLoginUserId: req.session.userInfo
           ? req.session.userInfo._id
           : "",
-        currentLoginUserStatus: req.session.userInfo
-          ? req.session.userInfo.isPremium
-          : "",
+        currentLoginUserStatus: req.user ? req.user.isPremium : "",
       });
     })
     .catch((err) => {

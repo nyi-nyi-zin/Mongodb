@@ -1,23 +1,21 @@
 <%- include("../includes/head") %>
 <section class="header">
   <div class="public-user">
-    <% if(postsArr[0].userId.profile_imgUrl){%><img
-      src="<%='/'+ postsArr[0].userId.profile_imgUrl %>"
-      alt="profile-image"
-      class="profile-photo"
-    />
-    <% }else {%>
-    <i class="fa-solid fa-circle-user"></i>
-    <% } %> <% if(postsArr[0].userId.username) {%>
-    <p class="premium-username">
-      <%= postsArr[0].userId.username %> <% if(postsArr[0].userId.isPremium){ %>
-      <i
-        class="fa-regular fa-star animate__animated animate__jello animate__infinite infinite"
-      ></i>
+    <% if(postsArr[0].userId.profile_imgUrl && postsArr[0].userId.isPremium ){ %>
+      <img src="<%= '/' + postsArr[0].userId.profile_imgUrl %>" alt="<%= postsArr[0].userId.usernam %>" class="profile-photo" />
+      <% }else{ %>
+        <i class="fa-solid fa-circle-user"></i>
+        <% } %>
+    <p class="">
+      <% if(postsArr[0].userId.username) {%>
+        <p class="premium-username"><%= postsArr[0].userId.username %>
+          <% if(postsArr[0].userId.isPremium){ %>
+          <i class="fa-regular fa-star animate__animated animate__jello animate__infinite	infinite"></i></p>
+          <%}%>
+      <%}else{%>
+          <p class="premium-username"><%= postsArr[0].userId.username %></p>
+      <%}%>
     </p>
-    <%}%> <%}else{%>
-    <p class="premium-username"><%= postsArr[0].userId.username %></p>
-    <%}%>
   </div>
   <div class="post-container">
     <% for(let post of postsArr) { %>

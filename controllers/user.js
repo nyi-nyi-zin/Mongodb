@@ -2,7 +2,6 @@ const { validationResult } = require("express-validator");
 const stripe = require("stripe")(
   "sk_test_51OXRstDezEDweoOhANJQVNgUXtPdCcTPg7g6FHfL43Y2UtV2xeyoY9BormevFNxmcISRt6ecS0znBajrQ5WzqcnA005pWKQikn"
 );
-
 const Post = require("../models/post");
 const User = require("../models/user");
 
@@ -16,7 +15,7 @@ exports.getProfile = (req, res, next) => {
     .then((totalPostCount) => {
       totalPostNumber = totalPostCount;
       return Post.find({ userId: req.user._id })
-        .populate("userId", "email profile_imgUrl username isPremium")
+        .populate("userId", "email username isPremium profile_imgUrl")
         .skip((pageNumber - 1) * POST_PAR_PAGE)
         .limit(POST_PAR_PAGE)
         .sort({ createdAt: -1 });
@@ -58,7 +57,7 @@ exports.getPublicProfile = (req, res, next) => {
     .then((totalPostCount) => {
       totalPostNumber = totalPostCount;
       return Post.find({ userId: id })
-        .populate("userId", "profile_imgUrl email isPremium username")
+        .populate("userId", "email isPremium username profile_imgUrl")
         .skip((pageNumber - 1) * POST_PAR_PAGE)
         .limit(POST_PAR_PAGE)
         .sort({ createdAt: -1 });
@@ -216,6 +215,7 @@ exports.getProfileUploadPage = (req, res) => {
 
 exports.setProfileImage = (req, res) => {
   const photo = req.file;
+
   const errors = validationResult(req);
 
   if (photo === undefined) {
@@ -227,16 +227,18 @@ exports.setProfileImage = (req, res) => {
 
   if (!errors.isEmpty()) {
     return res.status(422).render("user/profile-upload", {
-      title: "Profile upload",
+      title: "Profile image",
       errorMsg: errors.array()[0].msg,
     });
   }
+
   User.findById(req.user._id)
     .then((user) => {
       user.profile_imgUrl = photo.path;
-      return user.save().then((_) => {
-        res.redirect("/admin/profile");
-      });
+      return user.save();
+    })
+    .then((_) => {
+      res.redirect("/admin/profile");
     })
     .catch((err) => {
       console.log(err);
